@@ -32,7 +32,7 @@ A fast, modern CLI wrapper for Minecraft Bedrock Dedicated Server (BDS) built wi
 Clone the repository and install dependencies:
 
 ```bash
-git clone [https://github.com/MistvaleStudios/BedrockOps.git](https://github.com/MistvaleStudios/BedrockOps.git)
+git clone https://github.com/MistvaleStudios/BedrockOps.git
 cd BedrockOps
 bun install
 ```
