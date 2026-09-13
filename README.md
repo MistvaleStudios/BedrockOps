@@ -11,10 +11,11 @@ A fast, modern CLI wrapper for Minecraft Bedrock Dedicated Server (BDS) built wi
 
 ## ✨ Features
 
-* 🎨 **Formatted Logging:** Strips clutter and injects structured, colorized output with explicit log levels (`INFO`, `WARN`, `ERROR`).
-* ⚡ **Custom Commands:** Adds management controls (`restart`, `update`, `status`) directly to the console without modifying server binaries.
-* 🛡️ **Process Watchdog:** Automatically monitors server health and handles graceful reboots on crash or freeze.
-* 🏎️ **Powered by Bun:** Near-instant execution, native TypeScript support, and low memory overhead.
+* 🎨 **Truecolor Terminal UI:** Fully parses Bedrock's extended `§` formatting codes (including material colors like Quartz and Netherite) into ANSI RGB, while stripping clutter and fixing vanilla color-bleed artifacts.
+* ⚡ **Interactive CLI:** Intercepts typed console inputs for real-time formatting (`CMD | Console`) and seamlessly passes standard commands (e.g., `say`, `stop`) directly to the BDS process.
+* 🛡️ **Process Watchdog:** Automatically monitors server health, clears the console on reboots, and handles graceful restarts on crash (Code 5) or freeze.
+* 🔄 **Safe Auto-Updater:** Queries Mojang's backend API for the latest BDS releases. Automatically backs up configurations and resource packs, utilizes a lock-safe rollback system to prevent Windows `EPERM` corruption, and cleanly deploys updates.
+* 🏎️ **Powered by Bun:** Near-instant execution, modular native TypeScript architecture, and low memory overhead.
 
 ---
 
@@ -32,7 +33,7 @@ A fast, modern CLI wrapper for Minecraft Bedrock Dedicated Server (BDS) built wi
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/MistvaleStudios/BedrockOps.git
+git clone [https://github.com/MistvaleStudios/BedrockOps.git](https://github.com/MistvaleStudios/BedrockOps.git)
 cd BedrockOps
 bun install
 ```
@@ -49,7 +50,7 @@ Update `config.json` with your server executable settings:
 
 ```json
 {
-  "serverPath": "./bedrock-server",
+  "serverPath": "./bedrock_server",
   "executable": "bedrock_server.exe",
   "autoRestartOnCrash": true,
   "logTimestamps": true
@@ -79,9 +80,9 @@ BedrockOps introduces custom commands directly alongside standard BDS console in
 | Command | Description |
 | :--- | :--- |
 | `ops help` | Displays all BedrockOps custom commands |
-| `ops restart` | Sends player warnings, shuts down BDS, and restarts the process |
-| `ops update` | Checks for and downloads the newest BDS release from Mojang |
-| `ops status` | Displays process uptime, RAM usage, and active player counts |
+| `ops restart` | Sends player warnings, gracefully shuts down BDS, clears the terminal, and restarts the process |
+| `ops update` | Safeguards configurations, fetches the newest BDS release from Mojang's API, and automatically applies the update |
+| `ops status` | Displays process uptime, wrapper RAM usage, and system health |
 
 *All standard vanilla commands (e.g., `say`, `kick`, `stop`) pass through cleanly to the BDS process.*
 
@@ -93,7 +94,7 @@ Contributions, issues, and feature requests are welcome!
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/NewFeature`)
-3. Commit your Changes (`git commit -m 'Add NewFeature'`)
+3. Commit your Changes (`git commit -m 'feat: Add NewFeature'`)
 4. Push to the Branch (`git push origin feature/NewFeature`)
 5. Open a Pull Request
 
