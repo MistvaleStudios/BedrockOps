@@ -51,7 +51,7 @@ Update `config.json` with your server executable settings:
 ```json
 {
   "serverPath": "./bedrock_server",
-  "executable": "bedrock_server.exe",
+  "executable": "./bedrock_server.exe",
   "autoRestartOnCrash": true,
   "logTimestamps": true
 }
