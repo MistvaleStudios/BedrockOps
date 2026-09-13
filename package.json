@@ -3,6 +3,10 @@
 	"module": "src/index.ts",
 	"type": "module",
 	"private": true,
+	"scripts": {
+		"dev": "bun run src/index.ts",
+		"build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile bedrockops"
+	},
 	"devDependencies": {
 		"@types/bun": "latest"
 	},
