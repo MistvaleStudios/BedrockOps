@@ -1,0 +1,6 @@
+{
+	"serverPath": "./bedrock_server",
+	"executable": "./bedrock_server.exe",
+	"autoRestartOnCrash": true,
+	"logTimestamps": true
+}
