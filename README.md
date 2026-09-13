@@ -5,7 +5,7 @@ A fast, modern CLI wrapper for Minecraft Bedrock Dedicated Server (BDS) built wi
 [![Bun](https://img.shields.io/badge/Bun-%23000000.svg?style=flat&logo=bun&logoColor=white)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Discord](https://img.shields.io/badge/Discord-Mistvale%20Studios-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.gg/mistvale)
+[![Discord](https://img.shields.io/badge/Discord-Mistvale%20Studios-5865F2?style=flat&logo=discord&logoColor=white)](https://discord.gg/yfVe2xttjJ)
 
 ---
 
