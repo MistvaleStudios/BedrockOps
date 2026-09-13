@@ -80,8 +80,10 @@ BedrockOps introduces custom commands directly alongside standard BDS console in
 | Command | Description |
 | :--- | :--- |
 | `ops help` | Displays all BedrockOps custom commands |
-| `ops restart` | Sends player warnings, gracefully shuts down BDS, clears the terminal, and restarts the process |
-| `ops update` | Safeguards configurations, fetches the newest BDS release from Mojang's API, and automatically applies the update |
+| `ops restart` | Warns players with a 5-minute countdown (5 seconds if the server is empty), gracefully shuts down BDS, clears the terminal, and restarts the process |
+| `ops restart dev` | Same as `ops restart` but always restarts in 5 seconds |
+| `ops update` | Uses the same countdown as `ops restart`, then safeguards configurations, fetches the newest BDS release from Mojang's API, and automatically applies the update |
+| `ops update dev` | Same as `ops update` but always stops in 5 seconds |
 | `ops status` | Displays process uptime, wrapper RAM usage, and system health |
 
 *All standard vanilla commands (e.g., `say`, `kick`, `stop`) pass through cleanly to the BDS process.*

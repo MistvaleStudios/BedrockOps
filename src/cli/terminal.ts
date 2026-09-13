@@ -36,7 +36,7 @@ function handleOpsCommand(command: string, manager: ServerManager): void {
 
 	switch (action) {
 		case 'help':
-			logOps('Available commands: help, status, restart, update');
+			logOps('Available commands: help, status, restart [dev], update [dev]');
 			break;
 
 		case 'status':
@@ -47,11 +47,11 @@ function handleOpsCommand(command: string, manager: ServerManager): void {
 			break;
 
 		case 'restart':
-			manager.restart('restart');
+			manager.restart('restart', args[1] === 'dev');
 			break;
 
 		case 'update':
-			manager.restart('update');
+			manager.restart('update', args[1] === 'dev');
 			break;
 
 		default:

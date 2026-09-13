@@ -8,16 +8,40 @@ import { applyMinecraftColours } from '../utils/colours';
 import { formatLog, logErr, logOps } from '../utils/logger';
 
 const LOG_REGEX = /^\[(.*?) (INFO|WARN|ERROR)\]\s*(.*)$/;
+const PLAYER_REGEX = /^Player (connected|disconnected): (.+?), xuid:/;
+
+const DEV_RESTART_DELAY = 5;
+const ACTIVE_RESTART_DELAY = 300;
+const WARNING_TIMES = [300, 120, 60, 30, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
+
+function splitDuration(seconds: number): { value: number; unit: string } {
+	const value = seconds >= 60 ? seconds / 60 : seconds;
+	const unit = `${seconds >= 60 ? 'minute' : 'second'}${value === 1 ? '' : 's'}`;
+
+	return { value, unit };
+}
+
+function formatDuration(seconds: number): string {
+	const { value, unit } = splitDuration(seconds);
+
+	return `${value} ${unit}`;
+}
+
+function formatCountdown(verb: string, seconds: number): string {
+	const { value, unit } = splitDuration(seconds);
+	const colour = seconds >= 300 ? '§a' : seconds >= 60 ? '§e' : '§c';
+	const text = `§o§7[Console]: §f${verb} in §r§l${colour}${value}§r §o§f${unit}§r`;
+
+	return `tellraw @a ${JSON.stringify({ rawtext: [{ text }] })}`;
+}
 
 export class ServerManager {
 	private server: any = null;
 	private serverName: string = 'Dedicated Server';
 	private isRestarting: boolean = false;
 	private isUpdating: boolean = false;
-
-	constructor() {
-		this.loadServerName();
-	}
+	private players: Set<string> = new Set();
+	private pendingTimers: ReturnType<typeof setTimeout>[] = [];
 
 	private loadServerName(): void {
 		const propsPath = join(config.serverPath, 'server.properties');
@@ -31,6 +55,9 @@ export class ServerManager {
 	}
 
 	public start(): void {
+		this.loadServerName();
+		this.players.clear();
+
 		this.server = spawn([config.executable], {
 			cwd: config.serverPath,
 			stdin: 'pipe',
@@ -47,28 +74,55 @@ export class ServerManager {
 
 	public sendCommand(cmd: string): void {
 		if (this.server?.stdin) {
-			this.server.stdin.write(`${cmd}\n`);
+			this.server.stdin.write(Buffer.from(`${cmd}\n`, 'latin1'));
 		}
 	}
 
-	public restart(reason: 'restart' | 'update' = 'restart'): void {
+	public restart(reason: 'restart' | 'update' = 'restart', dev: boolean = false): void {
 		if (!this.server?.stdin) return;
-		if (reason === 'update') {
-			this.isUpdating = true;
-			logOps('Initiating update process...');
-			this.sendCommand('say Server is updating to the latest version in 5 seconds!');
-		} else {
-			this.isRestarting = true;
-			logOps('Initiating graceful restart...');
-			this.sendCommand('say Server is restarting in 5 seconds!');
+
+		if (this.isRestarting || this.isUpdating) {
+			logOps('A restart is already scheduled.');
+			return;
 		}
 
-		setTimeout(() => {
-			this.sendCommand('stop');
-		}, 5000);
+		const delay = !dev && this.players.size > 0 ? ACTIVE_RESTART_DELAY : DEV_RESTART_DELAY;
+		const verb = reason === 'update' ? 'Updating to the latest version' : 'Restarting';
+
+		if (reason === 'update') {
+			this.isUpdating = true;
+			logOps(`Initiating update process in ${formatDuration(delay)} (${this.players.size} online)...`);
+		} else {
+			this.isRestarting = true;
+			logOps(`Initiating graceful restart in ${formatDuration(delay)} (${this.players.size} online)...`);
+		}
+
+		for (const warnAt of WARNING_TIMES) {
+			if (warnAt > delay) continue;
+
+			this.pendingTimers.push(
+				setTimeout(() => {
+					this.sendCommand(formatCountdown(verb, warnAt));
+				}, (delay - warnAt) * 1000),
+			);
+		}
+
+		this.pendingTimers.push(
+			setTimeout(() => {
+				this.sendCommand('stop');
+			}, delay * 1000),
+		);
+	}
+
+	private clearPendingTimers(): void {
+		for (const timer of this.pendingTimers) clearTimeout(timer);
+
+		this.pendingTimers = [];
 	}
 
 	private async handleExit(code: number): Promise<void> {
+		this.clearPendingTimers();
+
 		if (this.isUpdating) {
 			logOps('Process stopped. Starting update sequence...');
 
@@ -100,6 +154,17 @@ export class ServerManager {
 
 			process.exit(0);
 		}
+	}
+
+	private trackPlayers(message: string): void {
+		const match = message.match(PLAYER_REGEX);
+
+		if (!match) return;
+
+		const name = match[2] as string;
+
+		if (match[1] === 'connected') this.players.add(name);
+		else this.players.delete(name);
 	}
 
 	private async streamOutput(currentServer: any): Promise<void> {
@@ -136,6 +201,7 @@ export class ServerManager {
 					else if (level === 'ERROR') lastLevel = chalk.red('ERR');
 					else lastLevel = chalk.green('INF');
 					if (message) {
+						this.trackPlayers(message);
 						console.log(formatLog(lastLevel, (l) => l, this.serverName, applyMinecraftColours(message)));
 					}
 				} else {
